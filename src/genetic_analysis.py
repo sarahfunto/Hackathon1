@@ -10,18 +10,18 @@ import pandas as pd
 def load_data(path: str) -> pd.DataFrame:
     """Load the CSV dataset."""
     try:
-        df = pd.read_csv(path)
+        genetic = pd.read_csv(path)
     except FileNotFoundError:
         raise FileNotFoundError(f"Error: file not found → {path}")
-    return df
+    return genetic
 
 
-def clean_data(df: pd.DataFrame) -> pd.DataFrame:
+def clean_data(genetic: pd.DataFrame) -> pd.DataFrame:
     """Clean and encode categorical values into numeric format."""
-    df_clean = df.copy()
+    genetic_clean = genetic.copy()
 
     # Strip whitespace
-    df_clean = df_clean.applymap(lambda x: x.strip() if isinstance(x, str) else x)
+    genetic_clean = genetic_clean.applymap(lambda x: x.strip() if isinstance(x, str) else x)
 
     # Binary mapping
     binary_mapping = {
@@ -41,19 +41,19 @@ def clean_data(df: pd.DataFrame) -> pd.DataFrame:
     ]
 
     for col in binary_columns:
-        if col in df_clean.columns:
-            df_clean[col] = df_clean[col].map(binary_mapping)
+        if col in genetic_clean.columns:
+            genetic_clean[col] = genetic_clean[col].map(binary_mapping)
 
     # Apply risk mapping
-    if "Environmental Risk Exposure" in df_clean.columns:
-        df_clean["Environmental Risk Exposure"] = df_clean["Environmental Risk Exposure"].map(risk_mapping)
+    if "Environmental Risk Exposure" in genetic_clean.columns:
+        genetic_clean["Environmental Risk Exposure"] = genetic_clean["Environmental Risk Exposure"].map(risk_mapping)
 
-    return df_clean
+    return genetic_clean
 
 
-def add_recommendations(df: pd.DataFrame) -> pd.DataFrame:
+def add_recommendations(genetic: pd.DataFrame) -> pd.DataFrame:
     """Add a simple rule-based risk recommendation."""
-    df = df.copy()
+    genetic = genetic.copy()
 
     def risk(row):
         if (row["Parental History"] == 1 or row["Sibling History"] == 1) and row["Environmental Risk Exposure"] == 2:
@@ -63,16 +63,16 @@ def add_recommendations(df: pd.DataFrame) -> pd.DataFrame:
         else:
             return "Low risk: standard follow-up"
 
-    df["Recommendation"] = df.apply(risk, axis=1)
-    return df
+    genetic["Recommendation"] = genetic.apply(risk, axis=1)
+    return genetic
 
 
 def main() -> None:
     """Run a minimal example."""
-    df = load_data("data/family_history_rare_disease_cleaned.csv")
-    df_clean = clean_data(df)
-    df_rec = add_recommendations(df_clean)
-    print(df_rec.head())
+    genetic = load_data("data/family_history_rare_disease_cleaned.csv")
+    genetic_clean = clean_data(genetic)
+    genetic_rec = add_recommendations(genetic_clean)
+    print(genetic_rec.head())
 
 
 if __name__ == "__main__":
